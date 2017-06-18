@@ -8,12 +8,14 @@ import java.util.Random;
 
 
 /**
- * puesto vacio = -1
- * mina         = 01
- * otro numero  = minas alrededor de casilla
+ * valor desconocido = -2
+ * puesto vacio      = -1
+ * mina              = 00
+ * otro numero       = minas alrededor de casilla
  */
 public class Tablero {
     private int[][] tablero;
+    private int[][] tableroDescubierto;
     private int alto;
     private int ancho;
     private int numMinas;
@@ -22,14 +24,22 @@ public class Tablero {
         this.ancho=ancho;
         this.numMinas=numMinas;
         tablero =new int[alto][ancho];
+        tableroDescubierto =new int[alto][ancho];
         for (int i=0;i<alto;i++){
             for (int j=0;j<ancho;j++){
                 tablero[i][j]=-1;
+                tableroDescubierto[i][j]=-2;
             }
         }
         initTablero(3,2);
     }
-    public void printTableroTexto(){
+    public int[][] getTablero(){
+        return tablero;
+    }
+    public int[][] getTableroDescubierto() {
+        return tableroDescubierto;
+    }
+    public void printTableroTexto(int tablero[][]){
         System.out.print("     ");
         for(int i=0;i<ancho;i++){
             System.out.print(String.format("%02d ",i));
@@ -85,6 +95,7 @@ public class Tablero {
             }
         }
         crearNumeros();
+        activaCasilla(posAlto, posAncho);
     }
     private boolean comprobarAlrededoresPlus(int posx, int posy){
         tablero[posx][posy]=88;
@@ -139,7 +150,7 @@ public class Tablero {
         int contador=0;
         for (int i=-1;i<=1;i++){
             for (int j=-1;j<=1;j++){
-                if(i==0&j==0){
+                if(i==0&&j==0){
                     continue;
                 }
                 posActualx=posx+i;
@@ -157,5 +168,51 @@ public class Tablero {
         if(contador==8){
             System.out.print("hola\n");
         }
+    }
+    public void activaCasilla(int posx, int posy){
+        if(tablero[posx][posy]==0){
+            System.out.println("Game over");
+            System.out.print("  _____\n" +
+                             " /     \\\n" +
+                             "| () () |\n" +
+                             " \\  ^  /\n" +
+                             "  |||||\n" +
+                             "  |||||");
+        }
+        else if(tablero[posx][posy]==-1){
+            clearArea(posx,posy);
+        }
+        else{
+            clearSquare(posx,posy);
+        }
+    }
+    private void clearSquare(int posx, int posy){
+        tableroDescubierto[posx][posy]=tablero[posx][posy];
+    }
+    private void clearArea(int posx, int posy){
+        int posActualx, posActualy;
+
+        for (int i=-1;i<=1;i++){
+            for (int j=-1;j<=1;j++){
+                posActualx=posx+i;
+                posActualy=posy+j;
+                if((posActualx>=0&&posActualy>=0)&&(posActualx<alto&&posActualy<ancho)){
+                    if(i==0&&j==0){
+                        clearSquare(posx, posy);
+                    }
+                    else if((tablero[posActualx][posActualy]==-1)&&(tableroDescubierto[posActualx][posActualy]==-2)){
+                        clearArea(posActualx, posActualy);
+                    }
+                    else {
+                        clearSquare(posActualx, posActualy);
+                    }
+                }
+
+
+
+
+            }
+        }
+
     }
 }
